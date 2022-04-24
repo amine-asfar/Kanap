@@ -1,27 +1,27 @@
-let panier = JSON.parse(localStorage.getItem("product")) || [];
-//console.log(panier)
+let basket = JSON.parse(localStorage.getItem("product")) || [];
+//console.log(basket)
 
 
-//ajouter les porduits dans panier + calcule total de prix
+//ajouter les porduits dans basket + calcule total de prix
 
 let totalprice = document.getElementById("totalPrice")
-let prix_total = 0
-for (let i = 0; i < panier.length; i++) {
-  let prix_qantity = panier[i].quantity * panier[i].prix_kanap
-  const html = `<article class="cart__item" data-id="${panier[i].id_kanape}" data-color="${panier[i].coleur_kanap}">
+let prixTotal = 0
+for (let i = 0; i < basket.length; i++) {
+  let prixQantity = basket[i].quantity * basket[i].prixKanap
+  const html = `<article class="cart__item" data-id="${basket[i].idKanape}" data-color="${basket[i].colorKanap}">
 <div class="cart__item__img">
-  <img src="${panier[i].image_kanap}" alt="Photographie d'un canapé">
+  <img src="${basket[i].imageKanap}" alt="Photographie d'un canapé">
 </div>
 <div class="cart__item__content">
   <div class="cart__item__content__description">
-    <h2>${panier[i].name_kanap}</h2>
-    <p>${panier[i].coleur_kanap}</p>
-    <p>${prix_qantity} €</p>
+    <h2>${basket[i].nameNanap}</h2>
+    <p>${basket[i].colorKanap}</p>
+    <p>${prixQantity} €</p>
   </div>
   <div class="cart__item__content__settings">
     <div class="cart__item__content__settings__quantity">
       <p>Qté : </p>
-      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${panier[i].quantity}">
+      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${basket[i].quantity}">
     </div>
     <div class="cart__item__content__settings__delete">
       <p class="deleteItem">Supprimer</p>
@@ -29,31 +29,31 @@ for (let i = 0; i < panier.length; i++) {
   </div>
 </div>
 </article>`
-  prix_total += prix_qantity
-  let element_position = document.getElementById("cart__items");
-  element_position.innerHTML += html;
+  prixTotal += prixQantity
+  let elementPosition = document.getElementById("cart__items");
+  elementPosition.innerHTML += html;
 }
 //inserer prix total
-totalprice.innerHTML = prix_total
+totalprice.innerHTML = prixTotal
 
 
 // supprime produit
 
-let btn_supprime = document.querySelectorAll(".deleteItem")
+let btnSupprime = document.querySelectorAll(".deleteItem")
 const el = document.querySelectorAll(".cart__item")
-for (let i = 0; i < btn_supprime.length; i++) {
+for (let i = 0; i < btnSupprime.length; i++) {
 
-  btn_supprime[i].addEventListener("click", () => {
+  btnSupprime[i].addEventListener("click", () => {
     //recuperer id + coleur de produit qui ont veux supprimer
-    let suprim_id = el[i].dataset.id;
-    let suprim_color = el[i].dataset.color
-    if (panier.length == 1) {
+    let deletId = el[i].dataset.id;
+    let deletColor = el[i].dataset.color
+    if (basket.length == 1) {
       localStorage.removeItem("product")
       location.reload()
     } else {
-      // panier = tous les produit sans le produit supprimer 
-      panier = panier.filter(elt => elt.id_kanape !== suprim_id || elt.coleur_kanap !== suprim_color);
-      localStorage.setItem("product", JSON.stringify(panier));
+      // basket = tous les produit sans le produit supprimer 
+      basket = basket.filter(elt => elt.idKanape !== deletId || elt.colorKanap !== deletColor);
+      localStorage.setItem("product", JSON.stringify(basket));
       console.log('Votre article a bien été supprimé.');
       location.reload()
     }
@@ -63,28 +63,42 @@ for (let i = 0; i < btn_supprime.length; i++) {
 
 
 
-function modifier_quantity_produit() {
-  let modifier_quantity = document.querySelectorAll(".itemQuantity");
+function modifierQuantityProduit() {
+  let changeQuantity = document.querySelectorAll(".itemQuantity");
 
-  for (let i = 0; i < modifier_quantity.length; i++) {
-    modifier_quantity[i].addEventListener("change", () => {
+
+  for (let i = 0; i < changeQuantity.length; i++) {
+    const input = changeQuantity[i]
+    input.addEventListener("change", () => {
+      const article = input.closest("article")
+
       //recuoerer quantite apres changer a partie de fichier html
-      let noveau_quantity = modifier_quantity[i].valueAsNumber;
-      //changer quantite de produit dans panier
-      panier[i].quantity = noveau_quantity;
+      let newQuantity = input.valueAsNumber;
+      if (newQuantity == 0) {
+        basket = basket.filter(elt => {
+          return elt.idKanape !== article.dataset.id || elt.colorKanap !== article.dataset.color
+        });
+        localStorage.setItem("product", JSON.stringify(basket));
+      } else {
 
-      localStorage.setItem("product", JSON.stringify(panier));
 
+        //changer quantite de produit dans basket
+        basket[i].quantity = newQuantity;
+
+      }
+      console.log(basket)
+      localStorage.setItem("product", JSON.stringify(basket));
       // refresh rapide
       location.reload();
+
     })
   }
 }
-modifier_quantity_produit();
+modifierQuantityProduit();
 
 //total quantite produit
-let total_pro = document.getElementById("totalQuantity")
-total_pro.innerHTML = panier.length
+let totalPro = document.getElementById("totalQuantity")
+totalPro.innerHTML = basket.length
 
 
 
@@ -98,19 +112,19 @@ btnSubmit.addEventListener("click", (e) => {
   const formulaire = {
     firstName: {
       input: document.getElementById("firstName"),
-      regex: /^[A-Za-z]{3,20}$/
+      regex: /^[A-Za-zÀ-ÖØ-öø-ÿ-\s]{3,20}$/
     },
     lastName: {
       input: document.getElementById("lastName"),
-      regex: /^[A-Za-z]{3,20}$/
+      regex: /^[A-Za-zÀ-ÖØ-öø-ÿ-\s]{3,20}$/
     },
     address: {
       input: document.getElementById("address"),
-      regex: /^[0-9A-Za-z\s]{5,50}$/
+      regex: /^[0-9A-Za-zÀ-ÖØ-öø-ÿ-\s]{5,50}$/
     },
     city: {
       input: document.getElementById("city"),
-      regex: /^[A-Za-z]{3,20}$/
+      regex: /^[A-Za-zÀ-ÖØ-öø-ÿ-\s]{3,20}$/
     },
     email: {
       input: document.getElementById("email"),
@@ -132,9 +146,7 @@ btnSubmit.addEventListener("click", (e) => {
       return errorEmail
     }
   }
-  console.log(error("firstName"))
-  console.log(error("address"))
-  console.log(error("email"))
+
 
   function validate(input, regex) {
     // selectionner le champ error qui est a coté du champ que tu veux valider
@@ -174,8 +186,8 @@ btnSubmit.addEventListener("click", (e) => {
 
 
   let products = [];
-  for (let i = 0; i < panier.length; i++) {
-    products.push(panier[i].id_kanape);
+  for (let i = 0; i < basket.length; i++) {
+    products.push(basket[i].idKanape);
   }
   console.log(products);
 
@@ -195,7 +207,7 @@ btnSubmit.addEventListener("click", (e) => {
   };
 
   console.log(submitFormul)// 1==true
-  if (submitFormul == true && panier.length != 0) {
+  if (submitFormul == true && basket.length != 0) {
     console.log("formul valid")
     fetch("http://localhost:3000/api/products/order", options)
       .then(response => response.json())
