@@ -2,24 +2,24 @@
 
 var urlcourante = window.location.href;
 var url = new URL(urlcourante);
-var search_params = new URLSearchParams(url.search);
+var searchParams = new URLSearchParams(url.search);
 
-if (search_params.has('id')) {
-    var id = search_params.get('id');
-    console.log(id)
+if (searchParams.has('id')) {
+    var id = searchParams.get('id');
+    //console.log(id)
 }
 async function get() {
     const response = await fetch(`http://localhost:3000/api/products/${id}`)
     const data = await response.json()
-    console.log(data)
+
 
     //inserer 
 
-    let photo_logo = document.createElement("img")
-    let elt_1 = document.querySelector(".item__img");
-    elt_1.appendChild(photo_logo)
-    //photo_logo.src = "../images/logo.png";
-    photo_logo.src = data.imageUrl
+    let photoLogo = document.createElement("img")
+    let elt1 = document.querySelector(".item__img");
+    elt1.appendChild(photoLogo)
+
+    photoLogo.src = data.imageUrl
 
     let title = document.getElementById("title")
     title.innerHTML = data.name
@@ -32,15 +32,16 @@ async function get() {
 
     for (let i in data.colors) {
         let opt = document.createElement("option")
-        let elt_2 = document.getElementById("colors")
-        elt_2.appendChild(opt)
+        let elt2 = document.getElementById("colors")
+        elt2.appendChild(opt)
         opt.value = data.colors[i]
         opt.innerHTML = data.colors[i]
 
     }
-    let btn_addproduit = document.getElementById("addToCart");
-    btn_addproduit.addEventListener('click', function () {
-        ajouter_produit(data)
+    let btnAddproduit = document.getElementById("addToCart");
+    btnAddproduit.addEventListener('click', function () {
+        addProduct(data)
+
     })
 }
 
@@ -49,16 +50,16 @@ get()
 
 
 
-function ajouter_produit(data) {
+function addProduct(data) {
 
 
     let produit = {
-        id_kanape: id,
-        coleur_kanap: document.getElementById("colors").value,
+        idKanape: id,
+        colorKanap: document.getElementById("colors").value,
         quantity: document.getElementById("quantity").value,
-        image_kanap: data.imageUrl,
-        prix_kanap: data.price,
-        name_kanap: data.name
+        imageKanap: data.imageUrl,
+        prixKanap: data.price,
+        nameNanap: data.name
 
     }
 
@@ -66,50 +67,60 @@ function ajouter_produit(data) {
 
     //JSON.stringify() takes a JavaScript object and transforms it into a JSON string.
     //JSON.parse() takes a JSON string and transforms it into a JavaScript object.
-    let panier = JSON.parse(localStorage.getItem("product"))
+    let basket = JSON.parse(localStorage.getItem("product")) || []
 
 
 
 
 
-    if (panier) {
+    if (basket && basket.length) {
+        if (produit.quantity == 0) {
+            alert("quantity 0 prouduit non ajouter")
+        }
+        else if (produit.colorKanap == "") {
+            alert("choisissez une couleur")
+        } else {
+            for (let i = 0; i < basket.length; i++) {
 
-        for (let i = 0; i < panier.length; i++) {
-            //if produit deja exist dans panier
-            if (produit.id_kanape == panier[i].id_kanape && produit.coleur_kanap == panier[i].coleur_kanap) {
-                return (
-                    panier[i].quantity = parseInt(panier[i].quantity) + parseInt(produit.quantity),
-                    console.log("produit exist , ajouter quantity"),
-                    localStorage.setItem("product", JSON.stringify(panier)),
-                    (panier = JSON.parse(localStorage.getItem("product")))
-
-                );
-
-            } else if ((produit.id_kanape == panier[i].id_kanape && produit.coleur_kanap != panier[i].coleur_kanap) ||
-                produit.id_kanape != panier[i].id_kanape) {
-                if (produit.quantity == 0) {
-                    alert("quantity 0 prouduit non ajouter")
-                } else {
+                //if produit deja exist dans basket
+                if (produit.idKanape == basket[i].idKanape && produit.colorKanap == basket[i].colorKanap) {
                     return (
-                        console.log("produit exist dans panier mais autre coleur ou noveau produit"),
-                        panier.push(produit),
-                        localStorage.setItem("product", JSON.stringify(panier))
+                        basket[i].quantity = parseInt(basket[i].quantity) + parseInt(produit.quantity),
+                        console.log("produit exist , ajouter quantity"),
+                        localStorage.setItem("product", JSON.stringify(basket)),
+                        (basket = JSON.parse(localStorage.getItem("product"))),
+                        alert("produit ajouter")
+
                     );
                 }
             }
-
+            for (let i = 0; i < basket.length; i++) {
+                if ((produit.idKanape == basket[i].idKanape && produit.colorKanap != basket[i].colorKanap) || (produit.idKanape != basket[i].idKanape)) {
+                    return (
+                        console.log("produit exist dans basket mais autre coleur ou noveau produit"),
+                        basket.push(produit),
+                        localStorage.setItem("product", JSON.stringify(basket)),
+                        alert("produit ajouter")
+                    );
+                }
+            }
 
         }
     } else {
         if (produit.quantity == 0) {
             alert("quantity 0 prouduit non ajouter")
-        } else {
-            console.log("panier vide")
-            panier = []
-            panier.push(produit)
-            localStorage.setItem("product", JSON.stringify(panier));
-            console.log(panier)
+        }
+        else if (produit.colorKanap == "") {
+            alert("choisissez une couleur")
+        }
+        else {
+            //console.log("basket vide")
+            basket = []
+            basket.push(produit)
+            localStorage.setItem("product", JSON.stringify(basket));
+            alert("produit ajouter")
+            //console.log(basket)
         }
     }
-}
 
+}
